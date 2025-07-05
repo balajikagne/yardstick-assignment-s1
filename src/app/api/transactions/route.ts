@@ -13,8 +13,11 @@ export async function GET() {
     await connectToDB();
     const data = await getTransactions();
     return NextResponse.json(data);
-  } catch (err) {
-    return NextResponse.json({ error: "Failed to fetch transactions" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to fetch transactions" },
+      { status: 500 }
+    );
   }
 }
 
@@ -25,8 +28,11 @@ export async function POST(req: Request) {
     await connectToDB();
     const saved = await addTransaction(body);
     return NextResponse.json(saved);
-  } catch (err) {
-    return NextResponse.json({ error: "Failed to create transaction" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to create transaction" },
+      { status: 500 }
+    );
   }
 }
 
@@ -37,13 +43,18 @@ export async function PUT(req: Request) {
     const id = searchParams.get("id");
     const body = await req.json();
 
-    if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    }
 
     await connectToDB();
     const updated = await updateTransaction(id, body);
     return NextResponse.json(updated);
-  } catch (err) {
-    return NextResponse.json({ error: "Failed to update transaction" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to update transaction" },
+      { status: 500 }
+    );
   }
 }
 
@@ -53,12 +64,17 @@ export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    }
 
     await connectToDB();
     const deleted = await deleteTransaction(id);
     return NextResponse.json(deleted);
-  } catch (err) {
-    return NextResponse.json({ error: "Failed to delete transaction" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to delete transaction" },
+      { status: 500 }
+    );
   }
 }
