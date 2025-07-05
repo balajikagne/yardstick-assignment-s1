@@ -15,7 +15,12 @@ export default async function EditTransactionPage({
     <div className="p-6 max-w-xl mx-auto">
       <h2 className="text-xl font-bold mb-4">Edit Transaction</h2>
       <TransactionForm
-        initialData={JSON.parse(JSON.stringify(transaction))}
+        initialData={{
+          _id: transaction._id.toString(), // convert ObjectId
+          amount: transaction.amount,
+          description: transaction.description,
+          date: transaction.date,
+        }}
       />
     </div>
   );
