@@ -2,14 +2,11 @@ import TransactionForm from "@/components/TransactionForm";
 import { getTransactionById } from "@/lib/actions";
 import { notFound } from "next/navigation";
 
-// Use this type for route params
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function EditTransactionPage({ params }: PageProps) {
+export default async function EditTransactionPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const transaction = await getTransactionById(params.id);
 
   if (!transaction) return notFound();
