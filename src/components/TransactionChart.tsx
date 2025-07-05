@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,29 +20,15 @@ interface Transaction {
   date: string;
 }
 
+interface ChartData {
+  month: string;
+  total: number;
+}
+
 export default function TransactionList() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [monthlyData, setMonthlyData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const fetchData = async () => {
-    try {
-      const res = await fetch("/api/transactions");
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setTransactions(data);
-        processChartData(data);
-      } else {
-        throw new Error("Invalid response");
-      }
-    } catch (err) {
-      console.error("Failed to fetch transactions", err);
-      Swal.fire("Error", "Failed to fetch transactions", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const processChartData = (data: Transaction[]) => {
     const monthlyMap: { [key: string]: number } = {};
@@ -55,13 +41,34 @@ export default function TransactionList() {
       monthlyMap[month] = (monthlyMap[month] || 0) + amount;
     });
 
-    const chartData = Object.entries(monthlyMap).map(([month, total]) => ({
-      month,
-      total,
-    }));
+    const chartData: ChartData[] = Object.entries(monthlyMap).map(
+      ([month, total]) => ({
+        month,
+        total,
+      })
+    );
 
     setMonthlyData(chartData);
   };
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/transactions");
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setTransactions(data);
+        processChartData(data);
+      } else {
+        throw new Error("Invalid response");
+      }
+    } catch {
+      Swal.fire("Error", "Failed to fetch transactions", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const handleDelete = async (id: string) => {
     const confirm = await Swal.fire({
@@ -84,7 +91,7 @@ export default function TransactionList() {
 
         await Swal.fire("Deleted!", "Transaction has been deleted.", "success");
         fetchData();
-      } catch (err) {
+      } catch {
         Swal.fire("Error", "Failed to delete transaction", "error");
       }
     }
@@ -92,7 +99,7 @@ export default function TransactionList() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   return (
     <div className="mt-6 space-y-6">
