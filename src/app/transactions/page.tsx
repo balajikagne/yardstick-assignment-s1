@@ -1,5 +1,4 @@
 import TransactionChart from "@/components/TransactionChart";
-import TransactionList from "@/components/TransactionList";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Suspense } from "react";
@@ -20,9 +19,7 @@ export default function TransactionsPage() {
         <TransactionChart />
       </Suspense>
 
-      {/* <Suspense fallback={<LoadingSpinner />}>
-        <TransactionList />
-      </Suspense> */}
+      
     </div>
   );
 }
