@@ -5,10 +5,11 @@ import { notFound } from "next/navigation";
 export default async function EditTransactionPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const transaction = await getTransactionById(params.id);
+  const { id } = await params;
 
+  const transaction = await getTransactionById(id);
   if (!transaction) return notFound();
 
   return (
@@ -16,10 +17,13 @@ export default async function EditTransactionPage({
       <h2 className="text-xl font-bold mb-4">Edit Transaction</h2>
       <TransactionForm
         initialData={{
-          _id: transaction._id.toString(), // convert ObjectId
+          _id: transaction._id.toString(),
           amount: transaction.amount,
           description: transaction.description,
-          date: transaction.date,
+          date:
+            typeof transaction.date === "string"
+              ? transaction.date
+              : transaction.date.toISOString().split("T")[0],
         }}
       />
     </div>
