@@ -1,8 +1,15 @@
 import { connectToDB } from "./db";
-import mongoose, { Schema, model, models } from "mongoose";
+import { Schema, model, models, Document } from "mongoose";
 
-// Define the Transaction schema
-const transactionSchema = new Schema({
+// Define the Transaction TypeScript type
+interface ITransaction extends Document {
+  amount: number;
+  description: string;
+  date: string;
+}
+
+// Define the Mongoose schema
+const transactionSchema = new Schema<ITransaction>({
   amount: {
     type: Number,
     required: true,
@@ -12,18 +19,19 @@ const transactionSchema = new Schema({
     required: true,
   },
   date: {
-    type: String, // or Date, if you prefer
+    type: String, // You can change to Date if needed
     required: true,
   },
 });
 
-// Use existing model if it exists to avoid overwrite error in dev
-const Transaction = models.Transaction || model("Transaction", transactionSchema);
+// Use existing model if available to avoid overwrite error
+const Transaction =
+  models.Transaction || model<ITransaction>("Transaction", transactionSchema);
 
 // Get all transactions
 export async function getTransactions() {
   await connectToDB();
-  return await Transaction.find().sort({ date: -1 });
+  return Transaction.find().sort({ date: -1 });
 }
 
 // Add a new transaction
@@ -34,27 +42,26 @@ export async function addTransaction(data: {
 }) {
   await connectToDB();
   const newTxn = new Transaction(data);
-  return await newTxn.save();
+  return newTxn.save();
 }
 
-// Update a transaction
-export async function updateTransaction(id: string, data: {
-  amount: number;
-  description: string;
-  date: string;
-}) {
+// Update an existing transaction
+export async function updateTransaction(
+  id: string,
+  data: { amount: number; description: string; date: string }
+) {
   await connectToDB();
-  return await Transaction.findByIdAndUpdate(id, data, { new: true });
+  return Transaction.findByIdAndUpdate(id, data, { new: true });
 }
 
 // Delete a transaction
 export async function deleteTransaction(id: string) {
   await connectToDB();
-  return await Transaction.findByIdAndDelete(id);
+  return Transaction.findByIdAndDelete(id);
 }
 
-// Get a single transaction by ID
+// Get transaction by ID
 export async function getTransactionById(id: string) {
   await connectToDB();
-  return await Transaction.findById(id);
+  return Transaction.findById(id);
 }
